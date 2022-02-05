@@ -5,22 +5,32 @@ import {
 } from '@heroicons/react/outline'
 import { useState, useEffect } from 'react'
 import { Alert } from './components/alerts/Alert'
-import { Grid } from './components/grid/Grid'
+import { InitialGrid } from './components/grid/InitialGrid'
+import { OngoingGrid } from './components/grid/OngoingGrid'
 import { Keyboard } from './components/keyboard/Keyboard'
 import { AboutModal } from './components/modals/AboutModal'
 import { InfoModal } from './components/modals/InfoModal'
 import { StatsModal } from './components/modals/StatsModal'
 import {
   GAME_TITLE,
-  WIN_MESSAGES,
   GAME_COPIED_MESSAGE,
   ABOUT_GAME_MESSAGE,
   NOT_ENOUGH_LETTERS_MESSAGE,
   WORD_NOT_FOUND_MESSAGE,
-  CORRECT_WORD_MESSAGE,
+  LOST_MESSAGE,
 } from './constants/strings'
-import { isWordInWordList, isWinningWord, solution } from './lib/words'
-import { addStatsForCompletedGame, loadStats } from './lib/stats'
+import { isWordInWordList, solution, solveAndGetGuesses } from './lib/words'
+import {
+  fetchAndStoreStatsForCompletedGame as addStatsForCompletedGame,
+  loadStats,
+} from './lib/stats'
+import {
+  getWinMessage,
+  getNumberOfCorrectGuesses,
+  doGuessesReflectAWinningState,
+  doGuessesReflectALosingState,
+  isGameInProgress,
+} from './lib/statuses'
 import {
   loadGameStateFromLocalStorage,
   saveGameStateToLocalStorage,
@@ -51,18 +61,27 @@ function App() {
       : false
   )
   const [successAlert, setSuccessAlert] = useState('')
+  const [initialGuesses, setInitialGuesses] = useState([''])
+
   const [guesses, setGuesses] = useState<string[]>(() => {
     const loaded = loadGameStateFromLocalStorage()
     if (loaded?.solution !== solution) {
+      const calculatedInitialGuesses = solveAndGetGuesses(solution)
+      saveGameStateToLocalStorage({
+        guesses: [],
+        initialGuesses: calculatedInitialGuesses,
+        solution,
+      })
+      setInitialGuesses(calculatedInitialGuesses)
       return []
     }
-    const gameWasWon = loaded.guesses.includes(solution)
-    if (gameWasWon) {
+    if (doGuessesReflectAWinningState(loaded.guesses, loaded.initialGuesses)) {
       setIsGameWon(true)
     }
-    if (loaded.guesses.length === 6 && !gameWasWon) {
+    if (doGuessesReflectALosingState(loaded.guesses, loaded.initialGuesses)) {
       setIsGameLost(true)
     }
+    setInitialGuesses(loaded.initialGuesses)
     return loaded.guesses
   })
 
@@ -82,13 +101,34 @@ function App() {
   }
 
   useEffect(() => {
-    saveGameStateToLocalStorage({ guesses, solution })
+    saveGameStateToLocalStorage({ guesses, solution, initialGuesses })
+    if (
+      !isGameInProgress(guesses, initialGuesses) &&
+      !isGameWon &&
+      !isGameLost
+    ) {
+      setStats(
+        addStatsForCompletedGame(
+          stats,
+          getNumberOfCorrectGuesses(guesses, initialGuesses)
+        )
+      )
+    }
+    if (doGuessesReflectAWinningState(guesses, initialGuesses)) {
+      setIsGameWon(true)
+    }
+    if (doGuessesReflectALosingState(guesses, initialGuesses)) {
+      setIsGameLost(true)
+    }
   }, [guesses])
 
   useEffect(() => {
     if (isGameWon) {
       setSuccessAlert(
-        WIN_MESSAGES[Math.floor(Math.random() * WIN_MESSAGES.length)]
+        getWinMessage(
+          getNumberOfCorrectGuesses(guesses, initialGuesses),
+          initialGuesses
+        )
       )
       setTimeout(() => {
         setSuccessAlert('')
@@ -103,7 +143,11 @@ function App() {
   }, [isGameWon, isGameLost])
 
   const onChar = (value: string) => {
-    if (currentGuess.length < 5 && guesses.length < 6 && !isGameWon) {
+    if (
+      currentGuess.length < 5 &&
+      guesses.length < initialGuesses.length - 1 &&
+      !isGameWon
+    ) {
       setCurrentGuess(`${currentGuess}${value}`)
     }
   }
@@ -130,21 +174,13 @@ function App() {
       }, ALERT_TIME_MS)
     }
 
-    const winningWord = isWinningWord(currentGuess)
-
-    if (currentGuess.length === 5 && guesses.length < 6 && !isGameWon) {
+    if (
+      currentGuess.length === 5 &&
+      isGameInProgress(guesses, initialGuesses) &&
+      !isGameWon
+    ) {
       setGuesses([...guesses, currentGuess])
       setCurrentGuess('')
-
-      if (winningWord) {
-        setStats(addStatsForCompletedGame(stats, guesses.length))
-        return setIsGameWon(true)
-      }
-
-      if (guesses.length === 5) {
-        setStats(addStatsForCompletedGame(stats, guesses.length + 1))
-        setIsGameLost(true)
-      }
     }
   }
 
@@ -165,12 +201,20 @@ function App() {
           onClick={() => setIsStatsModalOpen(true)}
         />
       </div>
-      <Grid guesses={guesses} currentGuess={currentGuess} />
+      <div className="flex justify-center mb-1">
+        <InitialGrid initialGuesses={initialGuesses} guesses={guesses} />
+        <OngoingGrid
+          initialGuesses={initialGuesses}
+          guesses={guesses}
+          currentGuess={currentGuess}
+        />
+      </div>
       <Keyboard
         onChar={onChar}
         onDelete={onDelete}
         onEnter={onEnter}
         guesses={guesses}
+        initialGuesses={initialGuesses}
       />
       <InfoModal
         isOpen={isInfoModalOpen}
@@ -183,6 +227,7 @@ function App() {
         gameStats={stats}
         isGameLost={isGameLost}
         isGameWon={isGameWon}
+        initialGuesses={initialGuesses}
         handleShare={() => {
           setSuccessAlert(GAME_COPIED_MESSAGE)
           return setTimeout(() => setSuccessAlert(''), ALERT_TIME_MS)
@@ -206,7 +251,7 @@ function App() {
         message={WORD_NOT_FOUND_MESSAGE}
         isOpen={isWordNotFoundAlertOpen}
       />
-      <Alert message={CORRECT_WORD_MESSAGE(solution)} isOpen={isGameLost} />
+      <Alert message={LOST_MESSAGE} isOpen={isGameLost} />
       <Alert
         message={successAlert}
         isOpen={successAlert !== ''}

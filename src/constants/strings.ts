@@ -1,12 +1,16 @@
-export const GAME_TITLE = 'GAME'
+export const GAME_TITLE = 'eldroW'
 
-export const WIN_MESSAGES = ['Great Job!', 'Awesome', 'Well done!']
+export const WIN_MESSAGE_1 = 'You did fine...'
+export const WIN_MESSAGE_2 = 'Not bad!'
+export const WIN_MESSAGE_3 = 'Good job!'
+export const WIN_MESSAGE_4 = 'Great job!'
+export const WIN_MESSAGE_5 = 'WOW! This is just... wow!'
+export const WIN_MESSAGE_6 = 'OMG! You are a genius! Perfect!'
+export const LOST_MESSAGE = 'You lose. You got none of the guesses:('
 export const GAME_COPIED_MESSAGE = 'Game copied to clipboard'
 export const ABOUT_GAME_MESSAGE = 'About this game'
 export const NOT_ENOUGH_LETTERS_MESSAGE = 'Not enough letters'
 export const WORD_NOT_FOUND_MESSAGE = 'Word not found'
-export const CORRECT_WORD_MESSAGE = (solution: string) =>
-  `The word was ${solution}`
 export const ENTER_TEXT = 'Enter'
 export const DELETE_TEXT = 'Delete'
 export const STATISTICS_TITLE = 'Statistics'

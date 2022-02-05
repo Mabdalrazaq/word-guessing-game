@@ -4,24 +4,22 @@ import {
   saveStatsToLocalStorage,
 } from './localStorage'
 
-// In stats array elements 0-5 are successes in 1-6 trys
-
-export const addStatsForCompletedGame = (
+export const fetchAndStoreStatsForCompletedGame = (
   gameStats: GameStats,
   count: number
 ) => {
-  // Count is number of incorrect guesses before end.
+  // Count is number of correct guesses out of 6
   const stats = { ...gameStats }
 
   stats.totalGames += 1
 
-  if (count > 5) {
-    // A fail situation
-    stats.currentStreak = 0
-    stats.gamesFailed += 1
-  } else {
+  if (count > 0) {
+    // A win situation
     stats.winDistribution[count] += 1
     stats.currentStreak += 1
+  } else {
+    stats.currentStreak = 0
+    stats.gamesFailed += 1
 
     if (stats.bestStreak < stats.currentStreak) {
       stats.bestStreak = stats.currentStreak
@@ -35,7 +33,7 @@ export const addStatsForCompletedGame = (
 }
 
 const defaultStats: GameStats = {
-  winDistribution: [0, 0, 0, 0, 0, 0],
+  winDistribution: Array(11).fill(0),
   gamesFailed: 0,
   currentStreak: 0,
   bestStreak: 0,
