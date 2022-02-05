@@ -24,7 +24,7 @@ export const calculateInitialGuessesForWord = (word: string): string[] => {
   const calculatedGuesses: string[] = [];
 
   while (true) {
-    const shuffledValidGuesses = shuffleWords([...VALIDGUESSES, ...WORDS]);
+    const shuffledValidGuesses = shuffleWords(WORDS);
 
     let calculatedGuess = calculateOneGuess(excludedLetters,
       presentLettersInCorrectIndecies,
