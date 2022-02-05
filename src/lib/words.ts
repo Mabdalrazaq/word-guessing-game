@@ -1,6 +1,5 @@
 import { WORDS } from '../constants/wordlist'
 import { VALIDGUESSES } from '../constants/validGuesses'
-import { CharValue } from './statuses'
 
 export const isWordInWordList = (word: string) => {
   return (

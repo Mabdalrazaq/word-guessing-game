@@ -1,9 +1,9 @@
 export const GAME_TITLE = 'eldroW'
 
-export const WIN_MESSAGE_1 = 'You did fine...'
-export const WIN_MESSAGE_2 = 'Not bad!'
-export const WIN_MESSAGE_3 = 'Good job!'
-export const WIN_MESSAGE_4 = 'Great job!'
+export const WIN_MESSAGE_1 = 'Okay... Not bad...'
+export const WIN_MESSAGE_2 = 'Nice!'
+export const WIN_MESSAGE_3 = 'Great Job!'
+export const WIN_MESSAGE_4 = 'Amazing!'
 export const WIN_MESSAGE_5 = 'WOW! This is just... wow!'
 export const WIN_MESSAGE_6 = 'OMG! You are a genius! Perfect!'
 export const LOST_MESSAGE = 'You lose. You got none of the guesses:('

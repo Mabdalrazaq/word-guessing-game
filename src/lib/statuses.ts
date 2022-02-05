@@ -1,4 +1,3 @@
-import { stat } from 'fs'
 import { WIN_MESSAGE_1, WIN_MESSAGE_2, WIN_MESSAGE_3, WIN_MESSAGE_4, WIN_MESSAGE_5, WIN_MESSAGE_6 } from '../constants/strings'
 import { solution } from './words'
 

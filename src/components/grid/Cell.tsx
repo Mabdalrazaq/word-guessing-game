@@ -9,7 +9,7 @@ type Props = {
 
 export const Cell = ({ value, status, isHidden }: Props) => {
   const classes = classnames(
-    'h-5 w-5 lg:w-14 lg:h-14 md:w-12 md:h-12 border-solid border-2 flex items-center justify-center mx-0.5 text-4xl font-bold rounded dark:text-white',
+    'h-5 w-5 text-lg md:w-12 md:h-12 md:text-2xl lg:w-14 lg:h-14 lg:text-4xl border-solid border-2 flex items-center justify-center mx-0.5 font-bold rounded dark:text-white',
     {
       'bg-green-500 text-white border-green-500': status === 'correct-all',
       'bg-red-500 text-white border-red-500': status === 'incorrect-all',

@@ -50,6 +50,11 @@ function App() {
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false)
   const [isAboutModalOpen, setIsAboutModalOpen] = useState(false)
   const [isNotEnoughLetters, setIsNotEnoughLetters] = useState(false)
+  const [isGameWonAlertDisplayed, setIsGameWonAlertDisplayed] = useState(false)
+  const [isGameLostAlertDisplayed, setIsGameLostAlertDisplayed] =
+    useState(false)
+  const [isGameCopiedAlertDisplayed, setIsGameCopiedAlertDisplayed] =
+    useState(false)
   const [isStatsModalOpen, setIsStatsModalOpen] = useState(false)
   const [isWordNotFoundAlertOpen, setIsWordNotFoundAlertOpen] = useState(false)
   const [isGameLost, setIsGameLost] = useState(false)
@@ -60,10 +65,19 @@ function App() {
       ? true
       : false
   )
-  const [successAlert, setSuccessAlert] = useState('')
-  const [initialGuesses, setInitialGuesses] = useState([''])
-
+  const [initialGuesses, setInitialGuesses] = useState<string[]>(() => {
+    const loaded = loadGameStateFromLocalStorage()
+    if (loaded) return loaded.initialGuesses
+    return solveAndGetGuesses(solution)
+  })
   const [guesses, setGuesses] = useState<string[]>(() => {
+    const loaded = loadGameStateFromLocalStorage()
+    if (loaded) return loaded.guesses
+    return []
+  })
+  const [stats, setStats] = useState(() => loadStats())
+
+  useEffect(() => {
     const loaded = loadGameStateFromLocalStorage()
     if (loaded?.solution !== solution) {
       const calculatedInitialGuesses = solveAndGetGuesses(solution)
@@ -73,7 +87,12 @@ function App() {
         solution,
       })
       setInitialGuesses(calculatedInitialGuesses)
-      return []
+      setGuesses([])
+      setIsGameLost(false)
+      setIsGameWon(false)
+      setIsStatsModalOpen(false)
+      setTimeout(() => {}, 5000)
+      return
     }
     if (doGuessesReflectAWinningState(loaded.guesses, loaded.initialGuesses)) {
       setIsGameWon(true)
@@ -81,11 +100,7 @@ function App() {
     if (doGuessesReflectALosingState(loaded.guesses, loaded.initialGuesses)) {
       setIsGameLost(true)
     }
-    setInitialGuesses(loaded.initialGuesses)
-    return loaded.guesses
-  })
-
-  const [stats, setStats] = useState(() => loadStats())
+  }, [])
 
   useEffect(() => {
     if (isDarkMode) {
@@ -101,46 +116,25 @@ function App() {
   }
 
   useEffect(() => {
-    saveGameStateToLocalStorage({ guesses, solution, initialGuesses })
-    if (
-      !isGameInProgress(guesses, initialGuesses) &&
-      !isGameWon &&
-      !isGameLost
-    ) {
-      setStats(
-        addStatsForCompletedGame(
-          stats,
-          getNumberOfCorrectGuesses(guesses, initialGuesses)
-        )
-      )
-    }
-    if (doGuessesReflectAWinningState(guesses, initialGuesses)) {
-      setIsGameWon(true)
-    }
-    if (doGuessesReflectALosingState(guesses, initialGuesses)) {
-      setIsGameLost(true)
-    }
-  }, [guesses])
-
-  useEffect(() => {
     if (isGameWon) {
-      setSuccessAlert(
-        getWinMessage(
-          getNumberOfCorrectGuesses(guesses, initialGuesses),
-          initialGuesses
-        )
-      )
+      setIsGameWonAlertDisplayed(true)
       setTimeout(() => {
-        setSuccessAlert('')
+        setIsGameWonAlertDisplayed(false)
         setIsStatsModalOpen(true)
       }, ALERT_TIME_MS)
     }
     if (isGameLost) {
+      setIsGameLostAlertDisplayed(true)
       setTimeout(() => {
+        setIsGameLostAlertDisplayed(false)
         setIsStatsModalOpen(true)
       }, ALERT_TIME_MS)
     }
   }, [isGameWon, isGameLost])
+
+  useEffect(() => {
+    saveGameStateToLocalStorage({ guesses, solution, initialGuesses })
+  })
 
   const onChar = (value: string) => {
     if (
@@ -176,10 +170,29 @@ function App() {
 
     if (
       currentGuess.length === 5 &&
-      isGameInProgress(guesses, initialGuesses) &&
-      !isGameWon
+      isGameInProgress(guesses, initialGuesses)
     ) {
-      setGuesses([...guesses, currentGuess])
+      const updatedGuesses = [...guesses, currentGuess]
+      if (doGuessesReflectAWinningState(updatedGuesses, initialGuesses)) {
+        setStats(
+          addStatsForCompletedGame(
+            stats,
+            getNumberOfCorrectGuesses(updatedGuesses, initialGuesses)
+          )
+        )
+        setIsGameWon(true)
+      }
+
+      if (doGuessesReflectALosingState(updatedGuesses, initialGuesses)) {
+        setStats(
+          addStatsForCompletedGame(
+            stats,
+            getNumberOfCorrectGuesses(updatedGuesses, initialGuesses)
+          )
+        )
+        setIsGameLost(true)
+      }
+      setGuesses(updatedGuesses)
       setCurrentGuess('')
     }
   }
@@ -229,8 +242,11 @@ function App() {
         isGameWon={isGameWon}
         initialGuesses={initialGuesses}
         handleShare={() => {
-          setSuccessAlert(GAME_COPIED_MESSAGE)
-          return setTimeout(() => setSuccessAlert(''), ALERT_TIME_MS)
+          setIsGameCopiedAlertDisplayed(true)
+          return setTimeout(
+            () => setIsGameCopiedAlertDisplayed(false),
+            ALERT_TIME_MS
+          )
         }}
       />
       <AboutModal
@@ -251,10 +267,18 @@ function App() {
         message={WORD_NOT_FOUND_MESSAGE}
         isOpen={isWordNotFoundAlertOpen}
       />
-      <Alert message={LOST_MESSAGE} isOpen={isGameLost} />
+      <Alert message={LOST_MESSAGE} isOpen={isGameLostAlertDisplayed} />
       <Alert
-        message={successAlert}
-        isOpen={successAlert !== ''}
+        message={getWinMessage(
+          getNumberOfCorrectGuesses(guesses, initialGuesses),
+          initialGuesses
+        )}
+        isOpen={isGameWonAlertDisplayed}
+        variant="success"
+      />
+      <Alert
+        message={GAME_COPIED_MESSAGE}
+        isOpen={isGameCopiedAlertDisplayed}
         variant="success"
       />
     </div>
