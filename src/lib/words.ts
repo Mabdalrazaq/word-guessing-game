@@ -38,9 +38,9 @@ export const calculateInitialGuessesForWord = (word: string): string[] => {
     //this will happen when the computer solves the wordle
     if (calculatedGuess === word)
       break;
-    
+
     //force the computer to solve the wordle if not solved after 10 guesses
-    if(calculatedGuesses.length===10){
+    if (calculatedGuesses.length === 10) {
       calculatedGuesses.push(word);
       break;
     }
@@ -107,8 +107,6 @@ export const calculateOneGuess = (excludedLetters: string[],
     for (const [letter, correctIndecies] of presentLettersInCorrectIndecies.entries()) {
       if (!guess.includes(letter))
         continue outerLoop;
-      if (!correctIndecies.includes(guess.indexOf(letter)))
-        continue outerLoop;
       for (let correctIndex of correctIndecies) {
         if (guess[correctIndex] !== letter)
           continue outerLoop;
@@ -117,8 +115,10 @@ export const calculateOneGuess = (excludedLetters: string[],
     for (const [letter, incorrectIndecies] of presentLettersInIncorrectIndecies.entries()) {
       if (!guess.includes(letter))
         continue outerLoop;
-      if (incorrectIndecies.includes(guess.indexOf(letter)))
-        continue outerLoop;
+      for (let incorrectIndex of incorrectIndecies) {
+        if (guess[incorrectIndex] === letter)
+          continue outerLoop;
+      }
     }
     return guess;
   }
