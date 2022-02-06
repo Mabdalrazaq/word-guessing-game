@@ -49,7 +49,7 @@ export const InfoModal = ({ isOpen, handleClose }: Props) => {
 
       <p className="font-bold mt-1 mb-1 text-sm text-gray-500 dark:text-gray-300 m">
         Your goal now is to guess the guesses, one by one, using only the colors the computer revealed, and the solution!
-        <br/> You have only one try for each guess. But you only need to guess one of the guesses to win this round! But the more guesses you guess, the better you score!
+        <br/> You have only one try for each guess. But you only need to guess one of the guesses to win this round! And the more guesses you guess, the higher you score!
       </p>
       <p className="italic mt-1 text-xs text-gray-500 dark:text-gray-300 m">
         Hint: The computer is not stupid; It would never guess a word with information contradicting with the feedback it got from guessing the previous word.
