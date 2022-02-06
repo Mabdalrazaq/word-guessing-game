@@ -71,9 +71,9 @@ export const getNumberOfCorrectGuesses = (guesses: string[], initialGuesses: str
   return sum;
 }
 
-export const getKeyStatus=(char:CharValue, initialGuesses:string[], guesses:string[]):CharStatus=>{
-  const revealedInitialGuesses = initialGuesses.slice(0,guesses.length).join("");
-  if(revealedInitialGuesses.includes(char)&&!solution.includes(char))
+export const getKeyStatus = (char: CharValue, initialGuesses: string[], guesses: string[]): CharStatus => {
+  const revealedInitialGuesses = initialGuesses.slice(0, guesses.length).join("");
+  if (revealedInitialGuesses.includes(char) && !solution.includes(char))
     return 'absent';
   return '';
 }
@@ -86,21 +86,14 @@ export const getGuessStatuses = (guess: string, initialGuesses: string[], isOnGo
   const splitSolution = selectdSolution.split('')
   const splitGuess = guess.split('')
 
-  const solutionCharsTaken = splitSolution.map((_) => false)
-
   const statuses: CharStatus[] = Array.from(Array(guess.length))
 
   // handle all correct cases first
   splitGuess.forEach((letter, i) => {
     if (letter === splitSolution[i]) {
       statuses[i] = 'correct'
-      solutionCharsTaken[i] = true
       return
     }
-  })
-
-  splitGuess.forEach((letter, i) => {
-    if (statuses[i]) return
 
     if (!splitSolution.includes(letter)) {
       // handles the absent case
@@ -109,18 +102,7 @@ export const getGuessStatuses = (guess: string, initialGuesses: string[], isOnGo
     }
 
     // now we are left with "present"s
-    const indexOfPresentChar = splitSolution.findIndex(
-      (x, index) => x === letter && !solutionCharsTaken[index]
-    )
-
-    if (indexOfPresentChar > -1) {
-      statuses[i] = 'present'
-      solutionCharsTaken[indexOfPresentChar] = true
-      return
-    } else {
-      statuses[i] = 'absent'
-      return
-    }
+    statuses[i] = 'present';
   })
 
   if (isOnGoingGrid) {
