@@ -18,6 +18,8 @@ import {
   NOT_ENOUGH_LETTERS_MESSAGE,
   WORD_NOT_FOUND_MESSAGE,
   LOST_MESSAGE,
+  HA3ATH,
+  HA3ATHABLE_WORDS,
 } from './constants/strings'
 import { isWordInWordList, solution, solveAndGetGuesses } from './lib/words'
 import {
@@ -49,14 +51,19 @@ function App() {
   const [isGameWon, setIsGameWon] = useState(false)
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false)
   const [isAboutModalOpen, setIsAboutModalOpen] = useState(false)
-  const [isNotEnoughLetters, setIsNotEnoughLetters] = useState(false)
+  const [
+    isNotEnoughLettersAlertDisplayed,
+    setIsNotEnoughLettersAlertDisplayed,
+  ] = useState(false)
   const [isGameWonAlertDisplayed, setIsGameWonAlertDisplayed] = useState(false)
   const [isGameLostAlertDisplayed, setIsGameLostAlertDisplayed] =
     useState(false)
   const [isGameCopiedAlertDisplayed, setIsGameCopiedAlertDisplayed] =
     useState(false)
+  const [isHa3athAlertDisplayed, setIsHa3athAlertDisplayed] = useState(false)
   const [isStatsModalOpen, setIsStatsModalOpen] = useState(false)
-  const [isWordNotFoundAlertOpen, setIsWordNotFoundAlertOpen] = useState(false)
+  const [isWordNotFoundAlertDisplayed, setIsWordNotFoundAlertDisplayed] =
+    useState(false)
   const [isGameLost, setIsGameLost] = useState(false)
   const [isDarkMode, setIsDarkMode] = useState(
     localStorage.getItem('theme')
@@ -155,16 +162,23 @@ function App() {
       return
     }
     if (!(currentGuess.length === 5)) {
-      setIsNotEnoughLetters(true)
+      setIsNotEnoughLettersAlertDisplayed(true)
       return setTimeout(() => {
-        setIsNotEnoughLetters(false)
+        setIsNotEnoughLettersAlertDisplayed(false)
+      }, ALERT_TIME_MS)
+    }
+
+    if (HA3ATHABLE_WORDS.includes(currentGuess.toLowerCase())) {
+      setIsHa3athAlertDisplayed(true)
+      return setTimeout(() => {
+        setIsHa3athAlertDisplayed(false)
       }, ALERT_TIME_MS)
     }
 
     if (!isWordInWordList(currentGuess)) {
-      setIsWordNotFoundAlertOpen(true)
+      setIsWordNotFoundAlertDisplayed(true)
       return setTimeout(() => {
-        setIsWordNotFoundAlertOpen(false)
+        setIsWordNotFoundAlertDisplayed(false)
       }, ALERT_TIME_MS)
     }
 
@@ -262,10 +276,13 @@ function App() {
         {ABOUT_GAME_MESSAGE}
       </button>
 
-      <Alert message={NOT_ENOUGH_LETTERS_MESSAGE} isOpen={isNotEnoughLetters} />
+      <Alert
+        message={NOT_ENOUGH_LETTERS_MESSAGE}
+        isOpen={isNotEnoughLettersAlertDisplayed}
+      />
       <Alert
         message={WORD_NOT_FOUND_MESSAGE}
-        isOpen={isWordNotFoundAlertOpen}
+        isOpen={isWordNotFoundAlertDisplayed}
       />
       <Alert message={LOST_MESSAGE} isOpen={isGameLostAlertDisplayed} />
       <Alert
@@ -281,6 +298,7 @@ function App() {
         isOpen={isGameCopiedAlertDisplayed}
         variant="success"
       />
+      <Alert message={HA3ATH} isOpen={isHa3athAlertDisplayed} />
     </div>
   )
 }

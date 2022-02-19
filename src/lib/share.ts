@@ -33,6 +33,8 @@ export const generateEmojiGrid = (guesses: string[], initialGuesses: string[]) =
                 return '🟩'
               case 'incorrect-all':
                 return '🟥'
+              case 'always-correct':
+                return '❤️';
               default:
                 return '⬜'
             }

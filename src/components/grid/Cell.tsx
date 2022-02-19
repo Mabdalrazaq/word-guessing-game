@@ -13,6 +13,7 @@ export const Cell = ({ value, status, isHidden }: Props) => {
     {
       'bg-green-500 text-white border-green-500': status === 'correct-all',
       'bg-red-500 text-white border-red-500': status === 'incorrect-all',
+      'bg-green-500 border-4 border-green-500': status === 'always-correct',
       'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-600':
         !status,
       'border-black dark:border-slate-100': value && !status,
@@ -24,6 +25,6 @@ export const Cell = ({ value, status, isHidden }: Props) => {
       'cell-animation': !!value,
     }
   )
-
-  return <div className={classes}>{isHidden?null:value}</div>
+  const displayedValue = status==='always-correct'?'❤️':value;
+  return <div className={classes}>{isHidden ? null : displayedValue}</div>
 }

@@ -1,7 +1,7 @@
-import { WIN_MESSAGE_1, WIN_MESSAGE_2, WIN_MESSAGE_3, WIN_MESSAGE_4, WIN_MESSAGE_5, WIN_MESSAGE_6 } from '../constants/strings'
+import { ALWAYS_CORRECT, WIN_MESSAGE_1, WIN_MESSAGE_2, WIN_MESSAGE_3, WIN_MESSAGE_4, WIN_MESSAGE_5, WIN_MESSAGE_6 } from '../constants/strings'
 import { solution } from './words'
 
-export type CharStatus = 'absent' | 'present' | 'correct' | 'incorrect-all' | 'correct-all' | ''
+export type CharStatus = 'absent' | 'present' | 'correct' | 'incorrect-all' | 'correct-all' | 'always-correct' | ''
 
 export type CharValue =
   | 'Q'
@@ -64,7 +64,7 @@ export const isGameInProgress = (guesses: string[], initialGuesses: string[]): b
 export const getNumberOfCorrectGuesses = (guesses: string[], initialGuesses: string[]): number => {
   let sum = 0;
   guesses.forEach((guess, i) => {
-    if (guess === initialGuesses[i]) {
+    if (guess === initialGuesses[i] || ALWAYS_CORRECT.includes(guess.toLowerCase())) {
       sum++;
     }
   })
@@ -106,6 +106,9 @@ export const getGuessStatuses = (guess: string, initialGuesses: string[], isOnGo
   })
 
   if (isOnGoingGrid) {
+    if(ALWAYS_CORRECT.includes(guess.toLowerCase())){
+      return statuses.map(status=>'always-correct');
+    }
     const allCorrect = statuses.filter(status => status === 'correct').length === 5;
     if (allCorrect) {
       return statuses.map(status => 'correct-all');

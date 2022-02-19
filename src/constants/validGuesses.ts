@@ -10656,4 +10656,5 @@ export const VALIDGUESSES = [
   'zygon',
   'zymes',
   'zymic',
+  'hawra'
 ]
